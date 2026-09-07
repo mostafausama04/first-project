@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'routes/app_router.dart';
-import 'package:first_project/app_theme.dart';
+import 'app_theme.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  
+  await Hive.openBox('contactsBox');
+  await Hive.openBox('remindersBox');
+
   runApp(const ContactReminderApp());
 }
 

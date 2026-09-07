@@ -11,6 +11,19 @@ final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: [
     GoRoute(
+      path: 'new_contact',
+      builder: (context, state) {
+      final extra = state.extra as Map<String, dynamic>?;
+      if (extra != null) {
+      return NewContactScreen(
+      editIndex: extra['index'],
+      editData: extra['contact'],
+      );
+    }
+    return const NewContactScreen();
+          },
+        ),
+    GoRoute(
       path: '/',
       builder: (context, state) => const GetStartedScreen(),
     ),
