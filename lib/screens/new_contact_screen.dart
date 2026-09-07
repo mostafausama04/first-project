@@ -6,9 +6,9 @@ import '../utils/validators.dart';
 
 class NewContactScreen extends StatefulWidget {
   final Map<String, dynamic>? editData;
-  final int? editIndex;
+  final dynamic hiveKey;
 
-  const NewContactScreen({super.key, this.editData, this.editIndex});
+  const NewContactScreen({super.key, this.editData, this.hiveKey});
 
   @override
   State<NewContactScreen> createState() => _NewContactScreenState();
@@ -38,11 +38,12 @@ class _NewContactScreenState extends State<NewContactScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.editIndex != null;
+    final isEditing = widget.hiveKey != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? "Edit Contact" : "New Contact", style: const TextStyle(color: kDarkTextColor)),
+        title: Text(isEditing ? "Edit Contact" : "New Contact",
+            style: const TextStyle(color: kDarkTextColor)),
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.close, color: kDarkTextColor),
@@ -58,27 +59,36 @@ class _NewContactScreenState extends State<NewContactScreen> {
               CircleAvatar(
                 radius: 50,
                 backgroundColor: Colors.grey.shade200,
-                backgroundImage: widget.editData != null ? NetworkImage(widget.editData!['picture']) : null,
-                child: widget.editData == null ? const Icon(Icons.person_add, size: 40, color: Colors.grey) : null,
+                backgroundImage: widget.editData != null
+                    ? NetworkImage(widget.editData!['picture'])
+                    : null,
+                child: widget.editData == null
+                    ? const Icon(Icons.person_add, size: 40, color: Colors.grey)
+                    : null,
               ),
               const SizedBox(height: 32),
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Full Name *', border: UnderlineInputBorder()),
-                validator: (value) => AppValidators.validateRequired(value, 'Full Name'),
+                decoration: const InputDecoration(
+                    labelText: 'Full Name *', border: UnderlineInputBorder()),
+                validator: (value) =>
+                    AppValidators.validateRequired(value, 'Full Name'),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(labelText: 'Phone Number *', border: UnderlineInputBorder()),
+                decoration: const InputDecoration(
+                    labelText: 'Phone Number *', border: UnderlineInputBorder()),
                 validator: (value) => AppValidators.validatePhone(value),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'Email Address *', border: UnderlineInputBorder()),
+                decoration: const InputDecoration(
+                    labelText: 'Email Address *',
+                    border: UnderlineInputBorder()),
                 validator: (value) => AppValidators.validateEmail(value),
               ),
               const SizedBox(height: 48),
@@ -86,15 +96,17 @@ class _NewContactScreenState extends State<NewContactScreen> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     final contactData = {
-                      'id': widget.editData?['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+                      'id': widget.editData?['id'] ??
+                          DateTime.now().millisecondsSinceEpoch.toString(),
                       'name': _nameController.text.trim(),
-                      'picture': widget.editData?['picture'] ?? 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=400',
+                      'picture': widget.editData?['picture'] ??
+                          'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=400',
                       'phone': _phoneController.text.trim(),
                       'email': _emailController.text.trim(),
                     };
 
                     if (isEditing) {
-                      HiveService.updateContact(widget.editIndex!, contactData);
+                      HiveService.updateContact(widget.hiveKey, contactData);
                     } else {
                       HiveService.addContact(contactData);
                     }
@@ -105,7 +117,8 @@ class _NewContactScreenState extends State<NewContactScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: kDarkTextColor,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
                 ),
                 child: Text(isEditing ? "UPDATE CONTACT" : "SAVE CONTACT"),
               ),

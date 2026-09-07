@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-import '../models.dart';
+import '../hive.dart';
 import '../screens/get_started_screen.dart';
 import '../screens/login_signup_screen.dart';
 import '../screens/main_navigation_screen.dart';
@@ -10,19 +10,6 @@ import '../screens/new_contact_screen.dart';
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: [
-    GoRoute(
-      path: 'new_contact',
-      builder: (context, state) {
-      final extra = state.extra as Map<String, dynamic>?;
-      if (extra != null) {
-      return NewContactScreen(
-      editIndex: extra['index'],
-      editData: extra['contact'],
-      );
-    }
-    return const NewContactScreen();
-          },
-        ),
     GoRoute(
       path: '/',
       builder: (context, state) => const GetStartedScreen(),
@@ -37,16 +24,32 @@ final GoRouter appRouter = GoRouter(
       routes: [
         GoRoute(
           path: 'new_contact',
-          builder: (context, state) => const NewContactScreen(),
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            if (extra != null) {
+              return NewContactScreen(
+                hiveKey: extra['hiveKey'],
+                editData: extra['contact'],
+              );
+            }
+            return const NewContactScreen();
+          },
         ),
         GoRoute(
           path: 'contact/:id',
           builder: (context, state) {
-            final contactId = state.pathParameters['id']!;
-            final contact = contacts.firstWhere(
-              (c) => c['id'] == contactId,
-              orElse: () => contacts[0],
-            );
+            final idParam = state.pathParameters['id']!;
+            dynamic hiveKey = int.tryParse(idParam) ?? idParam;
+            
+            final rawContact = HiveService.getContact(hiveKey) ?? {
+              'name': 'Unknown Contact',
+              'phone': '',
+              'email': '',
+              'picture': 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=400',
+            };
+            
+            final contact = rawContact.map((key, value) => MapEntry(key, value?.toString() ?? ''));
+            
             return ContactDetailScreen(contact: contact);
           },
         ),

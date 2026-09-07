@@ -27,48 +27,73 @@ class _ContactListScreenState extends State<ContactListScreen> {
         backgroundColor: Colors.white,
         centerTitle: false,
       ),
-      body: ListView.builder(
-        itemCount: contacts.length,
-        itemBuilder: (context, index) {
-          final contact = contacts[index];
-          return Dismissible(
-            key: Key(contact['id'] ?? index.toString()),
-            direction: DismissDirection.endToStart,
-            background: Container(
-              color: Colors.red,
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: const Icon(Icons.delete, color: Colors.white),
-            ),
-            onDismissed: (direction) {
-              HiveService.deleteContact(index);
-              setState(() {});
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Contact deleted')),
-              );
-            },
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(contact['picture'] ?? ''),
-              ),
-              title: Text(contact['name'] ?? '',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text(contact['phone'] ?? ''),
-              trailing: IconButton(
-                icon: const Icon(Icons.edit, size: 20),
-                onPressed: () async {
-                  // Navigate to Edit screen passing index
-                  final result = await context.push('/home/new_contact', extra: {'index': index, 'contact': contact});
-                  if (result == true) setState(() {});
-                },
-              ),
-              onTap: () {
-                context.go('/home/contact/$index');
+      body: contacts.isEmpty
+          ? const Center(child: Text("No contacts found. Add one!"))
+          : ListView.builder(
+              itemCount: contacts.length,
+              itemBuilder: (context, index) {
+                final contact = contacts[index];
+                final hiveKey = contact['hiveKey'];
+
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(contact['picture'] ?? ''),
+                  ),
+                  title: Text(
+                    contact['name'] ?? '',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(contact['phone'] ?? ''),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, size: 20, color: Colors.blue),
+                        onPressed: () async {
+                          final result = await context.push(
+                            '/home/new_contact',
+                            extra: {'hiveKey': hiveKey, 'contact': contact},
+                          );
+                          if (result == true) setState(() {});
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Delete Contact'),
+                              content: Text('Are you sure you want to delete ${contact['name']}?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    HiveService.deleteContact(hiveKey);
+                                    setState(() {});
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Contact deleted')),
+                                    );
+                                  },
+                                  child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    context.go('/home/contact/$hiveKey');
+                  },
+                );
               },
             ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await context.push('/home/new_contact');
