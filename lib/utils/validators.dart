@@ -1,30 +1,38 @@
 class AppValidators {
-
-  static String? validateRequired(String? value, String fieldName) {
+  static String? validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter $fieldName';
+      return 'Name is required';
+    }
+    if (value.trim().length < 3) {
+      return 'Name must be at least 3 characters';
     }
     return null;
   }
 
   static String? validatePhone(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter a phone number';
+      return 'Phone Number is required';
     }
-    if (value.trim().length < 6) {
-      return 'Please enter a valid phone number';
+    if (value.trim().length != 11) {
+      return 'Number must be 11 digits';
     }
     return null;
   }
 
   static String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter an email address';
+      return 'Email is required';
     }
-
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(value.trim())) {
-      return 'Please enter a valid email address';
+      return 'not valid Email format';
+    }
+    return null;
+  }
+
+  static String? validateCategory(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'this field is Required';
     }
     return null;
   }
